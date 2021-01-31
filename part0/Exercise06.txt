@@ -1,0 +1,13 @@
+note over browser:
+User types note contents 
+into input field and clicks Save
+end note
+
+browser->browser: spa.js form.onSubmit(note)
+note over browser:
+note is added to the list
+rendered note list is cleared
+notes are redrawn
+end note
+
+browser->server: spa.js sendToServer\nHTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
