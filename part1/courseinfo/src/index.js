@@ -28,8 +28,8 @@ const Part = (props) => {
 }
 
 const Total = (props) => {
-  var total = 0;
-  for (var i = 0; i < props.array.length; i++) {
+  let total = 0;
+  for (let i = 0; i < props.array.length; i++) {
     total += props.array[i];
   }
   return (
