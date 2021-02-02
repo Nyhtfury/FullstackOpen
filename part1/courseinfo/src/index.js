@@ -29,9 +29,9 @@ const Part = (props) => {
 
 const Total = (props) => {
   let total = 0;
-  for (let i = 0; i < props.array.length; i++) {
-    total += props.array[i];
-  }
+  props.array.forEach(value => {
+    total += value;
+  })
   return (
     <p>
       Number of exercises {total}
