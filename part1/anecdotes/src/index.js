@@ -14,7 +14,9 @@ function getAllIndexes(arr, val) {
 }
 
 function arrayAllMaxIndexes(array) {
-    return getAllIndexes(array, array.reduce((a, b) => (Math.max(a, b))));
+    return getAllIndexes(array, array.reduce((a, b) => {
+        return Math.max(a, b);
+    }));
 }
 
 const Button = ({handleClick, text}) => (
@@ -44,34 +46,45 @@ const VoteCounter = ({value}) => {
     )
 }
 
-const PluralVoteCounter = ({value}) => (
-    <>
-        <Indicator verb={"have"} value={value} unit={"votes"}/>
-    </>
-)
-
-const Anecdote = ({quotes, votes}) => {
-    if (quotes.length === 1)
+const PluralVoteCounter = ({value}) => {
+    if (value === 1)
         return (
             <>
-                {quotes[0]}<br/>
-                <VoteCounter value={votes}/>
+                <Indicator verb={"...all have"} value={value} unit={"vote"}/>
             </>
         )
 
     return (
         <>
-            {
-                quotes.map((quote) => {
-                    return (
-                        <>
-                            {quote}<br/>
-                        </>
-                    )
-                })
-            }
-            <PluralVoteCounter value={votes}/>
+            <Indicator verb={"...all have"} value={value} unit={"votes"}/>
         </>
+    )
+}
+
+const Anecdote = ({quotes, numVotes}) => {
+    if (quotes.length === 1)
+        return (
+            <div>
+                {quotes[0]}<br/>
+                <VoteCounter value={numVotes}/>
+            </div>
+        )
+
+    return (
+        <div>
+            <ul>
+                {
+                    quotes.map((quote) => {
+                        return (
+                            <li key={quote}>
+                                {quote}<br/>
+                            </li>
+                        )
+                    })
+                }
+            </ul>
+            <PluralVoteCounter value={numVotes}/>
+        </div>
     )
 }
 
@@ -80,25 +93,25 @@ const App = ({anecdotes}) => {
     const [votes, setVotes] = useState(Array.apply(null, new Array(anecdotes.length)).map(Number.prototype.valueOf, 0))
 
     const voteForAnecdote = position => {
-        let newVotes = {...votes}
+        let newVotes = [...votes]
         newVotes[position] += 1
         setVotes(newVotes)
     }
 
-    const anecdotesIndiciesWithMostVotes = arrayAllMaxIndexes(votes)
+    const anecdotesIndicesWithMostVotes = arrayAllMaxIndexes(votes)
     let specialAnecdotes = []
-    anecdotesIndiciesWithMostVotes.map((index) => {
+    anecdotesIndicesWithMostVotes.forEach((index) => {
         specialAnecdotes.push(anecdotes[index])
     } )
 
     return (
         <div>
             <h1>Anecdote of the day</h1>
-            <Anecdote quotes={anecdotes[selected]} votes={votes[selected]}/>
+            <Anecdote quotes={[anecdotes[selected]]} numVotes={votes[selected]}/>
             <Button text={"vote"} handleClick={() => voteForAnecdote(selected)}/>
             <Button text={"Next Anecdote"} handleClick={() => setSelected(getRandomInt(anecdotes.length))}/>
             <h1>Anecdote(s) with most votes</h1>
-            <Anecdote quotes={specialAnecdotes} votes={votes[anecdotesIndiciesWithMostVotes[0]]}/>
+            <Anecdote quotes={specialAnecdotes} numVotes={votes[anecdotesIndicesWithMostVotes[0]]}/>
         </div>
     )
 }
