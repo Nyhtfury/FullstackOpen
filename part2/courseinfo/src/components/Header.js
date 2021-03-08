@@ -1,8 +1,8 @@
 import React from 'react'
 
-const Header = ({ course }) => {
+const Header = ({ courseName }) => {
     return (
-        <h1>{course.name}</h1>
+        <h1>{courseName}</h1>
     )
 }
 
