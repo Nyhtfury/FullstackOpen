@@ -60,8 +60,13 @@ const App = () => {
         if (duplicate) {
             alert(`${newPerson.name} is already added to phonebook`)
         } else {
-            setPersons(persons.concat(newPerson))
+            let tempPersons = persons.concat(newPerson)
+            setPersons(tempPersons)
+            setFilteredPersons(tempPersons.filter(person => Object.values(person)
+                .map(el => el.toLowerCase().includes(filter))
+                .includes(true)))
             setNewName('')
+            setNewNumber('')
         }
     }
 
