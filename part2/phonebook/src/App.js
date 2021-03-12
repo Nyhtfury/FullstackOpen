@@ -16,8 +16,21 @@ const App = () => {
             name: newName
         }
 
-        setPersons(persons.concat(newPerson))
-        setNewName('')
+        let duplicate = false;
+        for (let i = 0; i < persons.length; i++) {
+            if (persons[i].name === newPerson.name) {
+                duplicate = true;
+                break;
+            }
+        }
+
+        if (duplicate) {
+            alert(`${newPerson.name} is already added to phonebook`)
+        } else {
+            setPersons(persons.concat(newPerson))
+            setNewName('')
+        }
+
     }
 
     return (
