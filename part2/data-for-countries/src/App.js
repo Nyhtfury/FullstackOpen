@@ -23,12 +23,17 @@ const App = () => {
         setFilteredCountries(countries.filter(country => applyFilter(country, tempFilter.toLowerCase())))
     }
 
+    const handleShowButton = (countryName) => {
+        setFilter(countryName)
+        setFilteredCountries(countries.filter(country => applyFilter(country, countryName.toLowerCase())))
+    }
+
     const applyFilter = (country, filterArg = filter) => country.name.toLowerCase().includes(filterArg)
 
   return (
     <>
         <Filter handleFilter={handleFilter} filterValue={filter}/>
-        <Countries countries={filteredCountries}/>
+        <Countries countries={filteredCountries} showButtonClick={handleShowButton}/>
     </>
   );
 }
