@@ -1,19 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import Persons from "./components/Persons";
 import PersonForm from "./components/PersonForm";
 import Filter from "./components/Filter";
 
 const App = () => {
-    const [ persons, setPersons ] = useState([
-        { name: 'Arto Hellas', number: '040-123456' },
-        { name: 'Ada Lovelace', number: '39-44-5323523' },
-        { name: 'Dan Abramov', number: '12-43-234345' },
-        { name: 'Mary Poppendieck', number: '39-23-6423122' }
-    ])
+    const [ persons, setPersons ] = useState([])
     const [ filteredPersons, setFilteredPersons ] = useState(persons)
     const [ newName, setNewName ] = useState('')
     const [ newNumber, setNewNumber ] = useState('')
     const [ filter, setFilter ] = useState('')
+
+    useEffect(() => {
+        axios
+            .get('http://localhost:3001/persons')
+            .then(response => {
+                setPersons(response.data)
+                setFilteredPersons(response.data)
+            })
+    },[])
+
+    const applyFilter = (person, filterArg = filter) => {
+        return Object.values(person)
+            .map(el => el.toString().toLowerCase().includes(filterArg))
+            .includes(true)
+    }
 
     const handleNewName = (event) => {
         setNewName(event.target.value)
@@ -24,13 +35,11 @@ const App = () => {
     }
 
     const handleFilter = (event) => {
-        // I think React schedules all state updates to happen after the completion of the handler
-        // therefore, use this temp value when filtering persons list (or suffer weird "indexing" errors)
+        /* I think React schedules all state updates to happen after the completion of the handler
+           therefore, use this temp value when filtering persons list (or suffer weird "indexing" errors) */
         let tempFilter = event.target.value.toLowerCase()
         setFilter(tempFilter)
-        setFilteredPersons(persons.filter(person => Object.values(person)
-            .map(el => el.toLowerCase().includes(tempFilter))
-            .includes(true)))
+        setFilteredPersons(persons.filter(person => applyFilter(person, tempFilter)))
     }
 
     const addPerson = (event) => {
@@ -62,9 +71,7 @@ const App = () => {
         } else {
             let tempPersons = persons.concat(newPerson)
             setPersons(tempPersons)
-            setFilteredPersons(tempPersons.filter(person => Object.values(person)
-                .map(el => el.toLowerCase().includes(filter))
-                .includes(true)))
+            setFilteredPersons(tempPersons.filter(person => applyFilter(person)))
             setNewName('')
             setNewNumber('')
         }
