@@ -37,9 +37,9 @@ const App = () => {
     const handleFilter = (event) => {
         /* I think React schedules all state updates to happen after the completion of the handler
            therefore, use this temp value when filtering persons list (or suffer weird "indexing" errors) */
-        let tempFilter = event.target.value.toLowerCase()
+        let tempFilter = event.target.value
         setFilter(tempFilter)
-        setFilteredPersons(persons.filter(person => applyFilter(person, tempFilter)))
+        setFilteredPersons(persons.filter(person => applyFilter(person, tempFilter.toLowerCase())))
     }
 
     const addPerson = (event) => {
