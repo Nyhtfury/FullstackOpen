@@ -25,7 +25,7 @@ const Countries = ({countries, showButtonClick}) => {
                     <>
                         {countries.map(country =>
                             <div key={country.name}>
-                                {country.name} <button name={"show"} onClick={showButtonClick(country.name)}/>
+                                {country.name} <button onClick={() => showButtonClick(country.name)}>show</button>
                             </div>
                         )}
                     </>
