@@ -10,10 +10,11 @@ const App = () => {
     const [ newName, setNewName ] = useState('')
     const [ newNumber, setNewNumber ] = useState('')
     const [ filter, setFilter ] = useState('')
+    const personsEndpoint = 'http://localhost:3001/persons'
 
     useEffect(() => {
         axios
-            .get('http://localhost:3001/persons')
+            .get(personsEndpoint)
             .then(response => {
                 setPersons(response.data)
                 setFilteredPersons(response.data)
@@ -40,6 +41,19 @@ const App = () => {
         let tempFilter = event.target.value
         setFilter(tempFilter)
         setFilteredPersons(persons.filter(person => applyFilter(person, tempFilter.toLowerCase())))
+    }
+
+    const addPersonToServer = (person) => {
+        axios
+            .post(personsEndpoint, person)
+            .then(response => {
+                console.log(response)
+                console.log(`Successfully added ${person.name} to 'backend'.`)
+            })
+            .catch(response => {
+                console.log(response)
+                console.log(`Failed to add ${person.name} to 'backend'.`)
+            })
     }
 
     const addPerson = (event) => {
@@ -69,6 +83,7 @@ const App = () => {
         if (duplicate) {
             alert(`${newPerson.name} is already added to phonebook`)
         } else {
+            addPersonToServer(newPerson)
             let tempPersons = persons.concat(newPerson)
             setPersons(tempPersons)
             setFilteredPersons(tempPersons.filter(person => applyFilter(person)))
