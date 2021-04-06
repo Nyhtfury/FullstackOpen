@@ -86,6 +86,25 @@ const App = () => {
         }
     }
 
+    const removePerson = (id) => {
+        const tempPerson = persons.find(p => p.id === id);
+        if (window.confirm(`Delete ${tempPerson.name}?`)) {
+            personService
+                .remove(id)
+                .then(response => {
+                    const tempPersons = persons.filter(p => p.id !== id);
+                    setPersons(tempPersons);
+                    setFilteredPersons(tempPersons.filter(p => applyFilter(p)));
+                    console.log(response);
+                    console.log(`Successfully removed ${tempPerson.name} from 'backend'.`);
+                })
+                .catch(response => {
+                    console.log(response);
+                    console.log(`Failed to remove ${tempPerson.name} from 'backend'.`)
+                })
+        }
+    }
+
     return (
         <div>
             <h1>Phonebook</h1>
@@ -97,7 +116,7 @@ const App = () => {
                         handleNewNumber={handleNewNumber}
                         addPerson={addPerson}/>
             <h2>Numbers</h2>
-            <Persons filteredPersons={filteredPersons}/>
+            <Persons filteredPersons={filteredPersons} onClickDelete={removePerson}/>
         </div>
     )
 }

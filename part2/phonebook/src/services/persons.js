@@ -11,9 +11,14 @@ const create = newPerson => {
     return request.then(response => response.data);
 }
 
+const remove = id => {
+    return axios.delete(`${personsEndpoint}/${id}`);
+}
+
 const personService = {
     getAll: getAll,
-    create: create
+    create: create,
+    remove: remove
 }
 
 export default personService
