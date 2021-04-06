@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import Persons from "./components/Persons";
 import PersonForm from "./components/PersonForm";
 import Filter from "./components/Filter";
+import personService from "./services/persons"
 
 const App = () => {
     const [ persons, setPersons ] = useState([])
@@ -10,14 +10,13 @@ const App = () => {
     const [ newName, setNewName ] = useState('')
     const [ newNumber, setNewNumber ] = useState('')
     const [ filter, setFilter ] = useState('')
-    const personsEndpoint = 'http://localhost:3001/persons'
 
     useEffect(() => {
-        axios
-            .get(personsEndpoint)
-            .then(response => {
-                setPersons(response.data)
-                setFilteredPersons(response.data)
+        personService
+            .getAll()
+            .then(initialPersons => {
+                setPersons(initialPersons)
+                setFilteredPersons(initialPersons)
             })
     },[])
 
@@ -41,19 +40,6 @@ const App = () => {
         let tempFilter = event.target.value
         setFilter(tempFilter)
         setFilteredPersons(persons.filter(person => applyFilter(person, tempFilter.toLowerCase())))
-    }
-
-    const addPersonToServer = (person) => {
-        axios
-            .post(personsEndpoint, person)
-            .then(response => {
-                console.log(response)
-                console.log(`Successfully added ${person.name} to 'backend'.`)
-            })
-            .catch(response => {
-                console.log(response)
-                console.log(`Failed to add ${person.name} to 'backend'.`)
-            })
     }
 
     const addPerson = (event) => {
@@ -81,14 +67,22 @@ const App = () => {
         }
 
         if (duplicate) {
-            alert(`${newPerson.name} is already added to phonebook`)
+            alert(`${newPerson.name} is in the phonebook`)
         } else {
-            addPersonToServer(newPerson)
-            let tempPersons = persons.concat(newPerson)
-            setPersons(tempPersons)
-            setFilteredPersons(tempPersons.filter(person => applyFilter(person)))
-            setNewName('')
-            setNewNumber('')
+            personService
+                .create(newPerson)
+                .then(returnedPerson => {
+                    let tempPersons = persons.concat(returnedPerson);
+                    setPersons(tempPersons);
+                    setFilteredPersons(tempPersons.filter(person => applyFilter(person)));
+                    setNewName('');
+                    setNewNumber('');
+                    console.log(`Successfully added ${newPerson.name} to 'backend'.`);
+                })
+                .catch(response => {
+                    console.log(response);
+                    console.log(`Failed to add ${newPerson.name} to 'backend'.`);
+                })
         }
     }
 
