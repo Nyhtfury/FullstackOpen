@@ -67,16 +67,35 @@ const App = () => {
         }
 
         if (duplicate) {
-            alert(`${newPerson.name} is in the phonebook`)
+            let result = window.confirm(`${newPerson.name} is already added to the phonebook, replace the old number with a new one?`)
+            if (result === true) {
+                personService
+                    .getPersonId(newPerson.name)
+                    .then(id => personService.update(id, newPerson))
+                    .catch(response => {
+                        console.log(response);
+                        console.log(`Failed to update ${newPerson.name}'s number.`);
+                    })
+                    .then(response => {
+                        const tempPersons = persons.map(person => {
+                            person.number = person.name === newPerson.name ? newPerson.number : person.number;
+                            return person;
+                        });
+                        updatePersonsState(tempPersons);
+                        console.log(`Updated UI with ${newPerson.name}'s updated info.`)
+                    })
+                    .catch(response => {
+                        console.log(response);
+                        console.log(`Failed to update UI with ${newPerson.name}'s updated info.`);
+                    })
+
+            }
         } else {
             personService
                 .create(newPerson)
                 .then(returnedPerson => {
-                    let tempPersons = persons.concat(returnedPerson);
-                    setPersons(tempPersons);
-                    setFilteredPersons(tempPersons.filter(person => applyFilter(person)));
-                    setNewName('');
-                    setNewNumber('');
+                    const tempPersons = persons.concat(returnedPerson);
+                    updatePersonsState(tempPersons);
                     console.log(`Successfully added ${newPerson.name} to 'backend'.`);
                 })
                 .catch(response => {
@@ -93,9 +112,7 @@ const App = () => {
                 .remove(id)
                 .then(response => {
                     const tempPersons = persons.filter(p => p.id !== id);
-                    setPersons(tempPersons);
-                    setFilteredPersons(tempPersons.filter(p => applyFilter(p)));
-                    console.log(response);
+                    updatePersonsState(tempPersons);
                     console.log(`Successfully removed ${tempPerson.name} from 'backend'.`);
                 })
                 .catch(response => {
@@ -103,6 +120,13 @@ const App = () => {
                     console.log(`Failed to remove ${tempPerson.name} from 'backend'.`)
                 })
         }
+    }
+
+    const updatePersonsState = (tempPersons) => {
+        setPersons(tempPersons);
+        setFilteredPersons(tempPersons.filter(person => applyFilter(person)));
+        setNewName('');
+        setNewNumber('');
     }
 
     return (
