@@ -2,61 +2,80 @@ import React, { useState, useEffect } from 'react'
 import Persons from "./components/Persons";
 import PersonForm from "./components/PersonForm";
 import Filter from "./components/Filter";
+import Notification from "./components/Notification";
 import personService from "./services/persons"
+import "./index.css"
 
 const App = () => {
-    const [ persons, setPersons ] = useState([])
-    const [ filteredPersons, setFilteredPersons ] = useState(persons)
-    const [ newName, setNewName ] = useState('')
-    const [ newNumber, setNewNumber ] = useState('')
-    const [ filter, setFilter ] = useState('')
+    const [ persons, setPersons ] = useState([]);
+    const [ filteredPersons, setFilteredPersons ] = useState(persons);
+    const [ newName, setNewName ] = useState('');
+    const [ newNumber, setNewNumber ] = useState('');
+    const [ filter, setFilter ] = useState('');
+    const [ error, setError ] = useState(false);
+    const [ statusMessage, setStatusMessage ] = useState('');
+    const [ timeoutReference, setTimeoutReference ] = useState(0);
 
     useEffect(() => {
         personService
             .getAll()
             .then(initialPersons => {
-                setPersons(initialPersons)
-                setFilteredPersons(initialPersons)
+                setPersons(initialPersons);
+                setFilteredPersons(initialPersons);
             })
     },[])
+
+    const setTimeoutStatus = (isError, message, timeout = 2500) => {
+        try {
+            clearTimeout(timeoutReference);
+        } catch (e) {
+            console.log(e);
+        }
+
+        setError(isError)
+        setStatusMessage(message);
+        setTimeoutReference(setTimeout(() => {
+            setStatusMessage(null);
+        }, timeout));
+    }
 
     const applyFilter = (person, filterArg = filter) => {
         return Object.values(person)
             .map(el => el.toString().toLowerCase().includes(filterArg))
-            .includes(true)
+            .includes(true);
     }
 
     const handleNewName = (event) => {
-        setNewName(event.target.value)
+        setNewName(event.target.value);
     }
 
     const handleNewNumber = (event) => {
-        setNewNumber(event.target.value)
+        setNewNumber(event.target.value);
     }
 
     const handleFilter = (event) => {
         /* I think React schedules all state updates to happen after the completion of the handler
            therefore, use this temp value when filtering persons list (or suffer weird "indexing" errors) */
-        let tempFilter = event.target.value
-        setFilter(tempFilter)
-        setFilteredPersons(persons.filter(person => applyFilter(person, tempFilter.toLowerCase())))
+        let tempFilter = event.target.value;
+        setFilter(tempFilter);
+        setFilteredPersons(persons.filter(person => applyFilter(person, tempFilter.toLowerCase())));
     }
 
     const addPerson = (event) => {
-        event.preventDefault()
+        event.preventDefault();
 
         if (!newName) {
-            alert("Please enter a name before proceeding.")
+            setTimeoutStatus(true, "Please enter a name before proceeding.");
             return;
         } else if (!newNumber) {
-            alert("Please enter a number before proceeding.")
+            setTimeoutStatus(true, "Please enter a number before proceeding.");
             return;
         }
 
         const newPerson = {
             name: newName,
             number: newNumber
-        }
+        };
 
         let duplicate = false;
         for (let i = 0; i < persons.length; i++) {
@@ -67,14 +86,14 @@ const App = () => {
         }
 
         if (duplicate) {
-            let result = window.confirm(`${newPerson.name} is already added to the phonebook, replace the old number with a new one?`)
+            let result = window.confirm(`${newPerson.name} is already added to the phonebook, replace the old number with a new one?`);
             if (result === true) {
                 personService
                     .getPersonId(newPerson.name)
                     .then(id => personService.update(id, newPerson))
                     .catch(response => {
                         console.log(response);
-                        console.log(`Failed to update ${newPerson.name}'s number.`);
+                        setTimeoutStatus(true, `Failed to update ${newPerson.name}'s number.`);
                     })
                     .then(response => {
                         const tempPersons = persons.map(person => {
@@ -82,13 +101,12 @@ const App = () => {
                             return person;
                         });
                         updatePersonsState(tempPersons);
-                        console.log(`Updated UI with ${newPerson.name}'s updated info.`)
+                        setTimeoutStatus(false, `Updated ${newPerson.name}'s info.`)
                     })
                     .catch(response => {
                         console.log(response);
-                        console.log(`Failed to update UI with ${newPerson.name}'s updated info.`);
-                    })
-
+                        setTimeoutStatus(true, `Failed to update ${newPerson.name}'s info.`)
+                    });
             }
         } else {
             personService
@@ -96,11 +114,11 @@ const App = () => {
                 .then(returnedPerson => {
                     const tempPersons = persons.concat(returnedPerson);
                     updatePersonsState(tempPersons);
-                    console.log(`Successfully added ${newPerson.name} to 'backend'.`);
+                    setTimeoutStatus(false, `Successfully added ${newPerson.name} to 'backend'.`);
                 })
                 .catch(response => {
                     console.log(response);
-                    console.log(`Failed to add ${newPerson.name} to 'backend'.`);
+                    setTimeoutStatus(true, `Failed to add ${newPerson.name} to 'backend'.`);
                 })
         }
     }
@@ -113,11 +131,11 @@ const App = () => {
                 .then(response => {
                     const tempPersons = persons.filter(p => p.id !== id);
                     updatePersonsState(tempPersons);
-                    console.log(`Successfully removed ${tempPerson.name} from 'backend'.`);
+                    setTimeoutStatus(false, `Successfully removed ${tempPerson.name} from 'backend'.`);
                 })
                 .catch(response => {
                     console.log(response);
-                    console.log(`Failed to remove ${tempPerson.name} from 'backend'.`)
+                    setTimeoutStatus(true, `Failed to remove ${tempPerson.name} from 'backend'.`)
                 })
         }
     }
@@ -132,6 +150,7 @@ const App = () => {
     return (
         <div>
             <h1>Phonebook</h1>
+            <Notification message={statusMessage} isError={error}/>
             <Filter filterValue={filter} handleFilter={handleFilter}/>
             <h2>add a new</h2>
             <PersonForm newName={newName}
