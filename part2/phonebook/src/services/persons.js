@@ -5,7 +5,10 @@ const getAll = () => {
     return axios
         .get(personsEndpoint)
         .then(response => response.data)
-        .catch(response => console.log(response));
+        .catch(error => {
+            console.log(error);
+            throw error;
+        });
 }
 
 const getPersonId = personName => {
@@ -18,9 +21,9 @@ const getPersonId = personName => {
             }
             return -1;
         })
-        .catch(response => {
-            console.log(response);
-            return -1;
+        .catch(error => {
+            console.log(error);
+            throw error;
         })
 }
 
@@ -28,19 +31,28 @@ const create = newPerson => {
     return axios
         .post(personsEndpoint, newPerson)
         .then(response => response.data)
-        .catch(response => console.log(response));
+        .catch(error => {
+            console.log(error);
+            throw error;
+        });
 }
 
 const update = (id, newPerson) => {
     return axios
         .put(`${personsEndpoint}/${id}`, newPerson)
-        .catch(response => console.log(response));
+        .catch(error => {
+            console.log(error);
+            throw error;
+        });
 }
 
 const remove = id => {
     return axios
         .delete(`${personsEndpoint}/${id}`)
-        .catch(response => console.log(response));
+        .catch(error => {
+            console.log(error);
+            throw error;
+        });
 }
 
 const personService = {

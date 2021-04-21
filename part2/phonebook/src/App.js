@@ -17,13 +17,20 @@ const App = () => {
     const [ timeoutReference, setTimeoutReference ] = useState(0);
 
     useEffect(() => {
+        initialize()
+    },[])
+
+    const initialize = () =>
+    {
         personService
             .getAll()
             .then(initialPersons => {
                 setPersons(initialPersons);
                 setFilteredPersons(initialPersons);
-            })
-    },[])
+                setNewName('');
+                setNewNumber('');
+            });
+    }
 
     const setTimeoutStatus = (isError, message, timeout = 2500) => {
         try {
@@ -91,11 +98,7 @@ const App = () => {
                 personService
                     .getPersonId(newPerson.name)
                     .then(id => personService.update(id, newPerson))
-                    .catch(response => {
-                        console.log(response);
-                        setTimeoutStatus(true, `Failed to update ${newPerson.name}'s number.`);
-                    })
-                    .then(response => {
+                    .then(() => {
                         const tempPersons = persons.map(person => {
                             person.number = person.name === newPerson.name ? newPerson.number : person.number;
                             return person;
@@ -105,7 +108,8 @@ const App = () => {
                     })
                     .catch(response => {
                         console.log(response);
-                        setTimeoutStatus(true, `Failed to update ${newPerson.name}'s info.`)
+                        setTimeoutStatus(true, `Failed to update ${newPerson.name}'s info (not found).`)
+                        initialize();
                     });
             }
         } else {
@@ -128,14 +132,15 @@ const App = () => {
         if (window.confirm(`Delete ${tempPerson.name}?`)) {
             personService
                 .remove(id)
-                .then(response => {
+                .then(() => {
                     const tempPersons = persons.filter(p => p.id !== id);
                     updatePersonsState(tempPersons);
                     setTimeoutStatus(false, `Successfully removed ${tempPerson.name} from 'backend'.`);
                 })
                 .catch(response => {
                     console.log(response);
-                    setTimeoutStatus(true, `Failed to remove ${tempPerson.name} from 'backend'.`)
+                    setTimeoutStatus(true, `Failed to remove ${tempPerson.name} from 'backend' (already removed).`)
+                    initialize();
                 })
         }
     }
